@@ -59,6 +59,14 @@ class UsersController < ApplicationController
     redirect_to users_url
   end
 
+  def search
+    if params[:name].present?
+      @users = User.where('name LIKE ?', "%#{params[:name]}%").paginate(page: params[:page])
+    else
+      redirect_to users_url
+    end
+  end
+
   private
 
     def user_params
@@ -87,7 +95,9 @@ class UsersController < ApplicationController
 
     # アクセスしたユーザーが現在ログインしているユーザーか確認します。
     def correct_user
-      redirect_to(root_url) unless current_user?(@user)
+      unless current_user.admin === true
+        redirect_to(root_url) unless current_user?(@user)
+      end
     end
 
     # システム管理権限所有かどうか判定します。
